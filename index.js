@@ -2,6 +2,9 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const logger = require('morgan')
 const cors = require('cors')
+require("dotenv").config();
+
+const Phone = require("./models/phone")
 
 const app = express()
 app.use(cors())
@@ -49,9 +52,11 @@ app.get('/', (req, res) => {
     res.send('<h1> Hello vorld! </h1>')
 })
 
-app.get('/api/persons', (req, res) => {
-    res.json(persons)
-})
+app.get("/api/persons", (request, response) => {
+	Phone.find({}).then((phones) => {
+		response.json(phones);
+	});
+});
 
 app.get('/api/persons/:id', (request, response) => {
     const id = Number(request.params.id)
