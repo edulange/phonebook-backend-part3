@@ -4,8 +4,7 @@ const logger = require('morgan')
 const cors = require('cors')
 require("dotenv").config();
 
-const Phone = require("./models/phone");
-const { default: mongoose } = require('mongoose');
+const Phone = require("./models/phone")
 
 const app = express()
 app.use(cors())
@@ -26,6 +25,7 @@ app.use(express.static('build'))
 
 
 
+
 app.get('/', (req, res) => {
     res.send('<h1> Hello vorld! </h1>')
 })
@@ -38,7 +38,7 @@ app.get("/api/persons", (request, response) => {
 
 app.get('/api/persons/:id', (request, response) => {
     const id = Number(request.params.id)
-    const person = person.find(person => person.id === id)
+    const person = persons.find(person => person.id === id)
     
     if (person) {
         response.json(person)
@@ -51,7 +51,7 @@ app.get('/api/persons/:id', (request, response) => {
 
 app.delete('/api/persons/:id', (request, response) => {
     const id = Number(request.params.id)
-    const person = person.filter(person => person.id !== id)
+    persons = persons.filter(person => person.id !== id)
     
     response.status(204).end()
 })
@@ -75,8 +75,8 @@ app.post('/api/persons', (request, response) => {
         })
     }
     
-    const isUniqueName = person.find(person => body.name === person.name)
-    const isUniqueNumber = person.find(person => body.number === person.number)
+    const isUniqueName = persons.find(person => body.name === person.name)
+    const isUniqueNumber = persons.find(person => body.number === person.number)
     
     if(!isUniqueName) {
         console.log("name is unique")
@@ -93,24 +93,19 @@ app.post('/api/persons', (request, response) => {
         })
     }
     
-    const person = new Phone ({
+    const person = {
         id: generateId(),
         name: body.name,
         number: body.number
-    })
+    }
     
-    person.save().then(result => {
-        console.log('Phone salvo')
-        mongoose.connection.close()
-    })
-    
-
+    persons = persons.concat(person)
     response.json(person)
 })
 
 app.get('/info', (request, response) => {
     const actualDate = new Date()
-    response.send(`Phonebook has info for ${person.length} people
+    response.send(`Phonebook has info for ${persons.length} people
     <br>${actualDate}<br>`)
     
 })
