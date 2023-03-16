@@ -38,7 +38,7 @@ app.get("/api/persons", (request, response) => {
 
 app.get('/api/persons/:id', (request, response) => {
     const id = Number(request.params.id)
-    const person = persons.find(person => person.id === id)
+    const person = person.find(person => person.id === id)
     
     if (person) {
         response.json(person)
@@ -51,7 +51,7 @@ app.get('/api/persons/:id', (request, response) => {
 
 app.delete('/api/persons/:id', (request, response) => {
     const id = Number(request.params.id)
-    persons = persons.filter(person => person.id !== id)
+    const person = person.filter(person => person.id !== id)
     
     response.status(204).end()
 })
@@ -75,8 +75,8 @@ app.post('/api/persons', (request, response) => {
         })
     }
     
-    const isUniqueName = persons.find(person => body.name === person.name)
-    const isUniqueNumber = persons.find(person => body.number === person.number)
+    const isUniqueName = person.find(person => body.name === person.name)
+    const isUniqueNumber = person.find(person => body.number === person.number)
     
     if(!isUniqueName) {
         console.log("name is unique")
@@ -104,13 +104,13 @@ app.post('/api/persons', (request, response) => {
         mongoose.connection.close()
     })
     
-    persons = persons.concat(person)
+
     response.json(person)
 })
 
 app.get('/info', (request, response) => {
     const actualDate = new Date()
-    response.send(`Phonebook has info for ${persons.length} people
+    response.send(`Phonebook has info for ${person.length} people
     <br>${actualDate}<br>`)
     
 })
