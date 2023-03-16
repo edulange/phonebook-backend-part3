@@ -4,7 +4,8 @@ const logger = require('morgan')
 const cors = require('cors')
 require("dotenv").config();
 
-const Phone = require("./models/phone")
+const Phone = require("./models/phone");
+const { default: mongoose } = require('mongoose');
 
 const app = express()
 app.use(cors())
@@ -92,11 +93,16 @@ app.post('/api/persons', (request, response) => {
         })
     }
     
-    const person = {
+    const person = new Phone ({
         id: generateId(),
         name: body.name,
         number: body.number
-    }
+    })
+    
+    person.save().then(result => {
+        console.log('Phone salvo')
+        mongoose.connection.close()
+    })
     
     persons = persons.concat(person)
     response.json(person)
