@@ -16,24 +16,17 @@ logger.token('body', (req, res) => {
 
 app.use(logger(':method :url :status :res[content-length] - :response-time ms :body'))
 
-
-
 app.use(express.json())
-// app.use(morgan(':method :url :status :res[content-length] - :response-time ms'));
-
 app.use(express.static('build'))
-
-
-
 
 app.get('/', (req, res) => {
     res.send('<h1> Hello vorld! </h1>')
 })
 
 app.get("/api/persons", (request, response) => {
-	Phone.find({}).then((phones) => {
-		response.json(phones);
-	});
+    Phone.find({}).then((phones) => {
+        response.json(phones);
+    });
 });
 
 app.get('/api/persons/:id', (request, response) => {
@@ -46,8 +39,6 @@ app.get('/api/persons/:id', (request, response) => {
         response.status(404).end()
     }
 })
-
-
 
 app.delete('/api/persons/:id', (request, response) => {
     const id = Number(request.params.id)
@@ -63,44 +54,34 @@ const generateId = () => {
 app.post('/api/persons', (request, response) => {
     const body = request.body
     
-
-    if(!body.name) {
+    if (!body.name) {
         return response.status(400).json({
             error: 'name content missing'
         })
     }
-    if(!body.number) {
+    if (!body.number) {
         return response.status(400).json({
             error: 'number content missing'
         })
     }
     
-    const isUniqueName = persons.find(person => body.name === person.name)
-    const isUniqueNumber = persons.find(person => body.number === person.number)
-    
-    if(!isUniqueName) {
-        console.log("name is unique")
-    } else {
-        return response.status(409).json({
-            error: "name should be unique"
+    Phone.findOne({ name: body.name })
+    .then((result) => {
+        if (result) {
+            return response.status(409).json({
+                error: 'name should be unique'
+            })
+        }
+        
+        const phone = new Phone({
+            name: body.name,
+            number: body.number
         })
-    }
-    if(!isUniqueNumber) {
-        console.log("number is unique")
-    } else {
-        return response.status(409).json({
-            error: "number should be unique"
+        
+        phone.save().then((savedPhone) => {
+            response.json(savedPhone.toJSON())
         })
-    }
-    
-    const person = {
-        id: generateId(),
-        name: body.name,
-        number: body.number
-    }
-    
-    persons = persons.concat(person)
-    response.json(person)
+    })
 })
 
 app.get('/info', (request, response) => {
@@ -110,7 +91,7 @@ app.get('/info', (request, response) => {
     
 })
 
-
 const PORT = 3001
-app.listen(PORT)
-console.log(`Server running na porta ${PORT}`)
+app.listen(PORT, () => {
+    console.log(`Server running on port ${PORT}`)
+})
