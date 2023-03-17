@@ -33,7 +33,8 @@ app.get("/api/persons", (request, response) => {
 
 app.get('/api/persons/:id', (request, response) => {
     const id = request.params.id
-    
+    const objId = mongoose.Types.ObjectId(id)
+
     Phone.findById(id)
         .then(person => {
             if (person) {
