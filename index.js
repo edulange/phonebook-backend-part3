@@ -33,7 +33,6 @@ app.get("/api/persons", (request, response) => {
 
 app.get('/api/persons/:id', (request, response) => {
     const id = request.params.id
-    const objId = mongoose.Types.ObjectId(id)
 
     Phone.findById(id)
         .then(person => {
@@ -84,7 +83,8 @@ app.post('/api/persons', (request, response) => {
         
         const phone = new Phone({
             name: body.name,
-            number: body.number
+            number: body.number,
+            id: generateId()
         })
         
         phone.save().then((savedPhone) => {
