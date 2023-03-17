@@ -1,2 +1,5 @@
 node_modules
 .env
+
+# como foi que eu consegui fazer o backend se conectar no db?
+# dentro do render eu fui em enviroment -> secret file -> filename .env e adicionei o q está dentro do meu aqquivo .env
