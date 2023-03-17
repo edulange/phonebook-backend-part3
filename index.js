@@ -33,7 +33,8 @@ app.get("/api/persons", (request, response) => {
 
 app.get('/api/persons/:id', (request, response) => {
     const id = request.params.id
-
+    
+    
     Phone.findById(id)
         .then(person => {
             if (person) {
@@ -83,8 +84,7 @@ app.post('/api/persons', (request, response) => {
         
         const phone = new Phone({
             name: body.name,
-            number: body.number,
-            id: generateId()
+            number: body.number
         })
         
         phone.save().then((savedPhone) => {
