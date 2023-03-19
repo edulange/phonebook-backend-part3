@@ -22,6 +22,20 @@ const requestLogger = (request, response, next) => {
 	next();
 };
 
+const errorHandler = (error, request, response, next) => {
+	console.error(error.message);
+
+	if (error.name === "CastError") {
+		return response.status(400).send({ error: "malformatted id" });
+	}
+
+	next(error);
+};
+
+const unknownEndpoint = (request, response) => {
+	response.status(404).send({ error: "unknown endpoint" });
+};
+
 app.use(express.json())
 app.use(express.static('build'))
 app.use(requestLogger);
@@ -64,9 +78,6 @@ app.delete('/api/persons/:id', (request, response) => {
     .catch(error => next(error))
 })
 
-const generateId = () => {
-    return Math.floor((Math.random() * 100000) + 1)
-}
 
 app.post('/api/persons', (request, response) => {
     const body = request.body
@@ -85,8 +96,10 @@ app.post('/api/persons', (request, response) => {
     Phone.findOne({ name: body.name })
     .then((result) => {
         if (result) {
-            return response.status(409).json({
-                error: 'name should be unique'
+            result.number = body.number
+            return result.save()
+            .then((updatedPhone) => {
+                response.json(updatedPhone.toJSON())
             })
         }
         
@@ -105,8 +118,11 @@ app.get('/info', (request, response) => {
     const actualDate = new Date()
     response.send(`Phonebook has info for ${persons.length} people
     <br>${actualDate}<br>`)
-    
 })
+
+app.use(unknownEndpoint)
+app.use(errorHandler);
+
 
 const PORT = 3001
 app.listen(PORT, () => {
