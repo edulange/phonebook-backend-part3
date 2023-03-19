@@ -93,25 +93,30 @@ app.post('/api/persons', (request, response) => {
         })
     }
     
-    Phone.findOne({ name: body.name })
-    .then((result) => {
-        if (result) {
-            result.number = body.number
-            return result.save()
-            .then((updatedPhone) => {
-                response.json(updatedPhone.toJSON())
-            })
-        }
-        
-        const phone = new Phone({
-            name: body.name,
-            number: body.number
+
+    Phone.findOneAndUpdate(
+        { name: body.name },
+        { number: body.number },
+        { new: true }
+      )
+        .then((updatedPhone) => {
+          if (updatedPhone) {
+            response.json(updatedPhone.toJSON());
+          } else {
+            const phone = new Phone({
+              name: body.name,
+              number: body.number,
+            });
+    
+            phone.save().then((savedPhone) => {
+              response.json(savedPhone.toJSON());
+            });
+          }
         })
-        
-        phone.save().then((savedPhone) => {
-            response.json(savedPhone.toJSON())
-        })
-    })
+        .catch((error) => {
+          console.log(error);
+          response.status(500).end();
+        });
 })
 
 app.get('/info', (request, response) => {
