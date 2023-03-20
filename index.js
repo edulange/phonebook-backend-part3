@@ -79,36 +79,30 @@ app.delete('/api/persons/:id', (request, response) => {
 })
 
 
-app.put('/api/persons/:id', (request, response) => {
-    const body = request.body
-  
+app.post('/api/persons', (request, response) => {
+    const body = request.body;
+    
     if (!body.name || !body.number) {
       return response.status(400).json({
-        error: 'name or number content missing'
-      })
+        error: 'name or number content missing',
+      });
     }
-  
-    const phone = {
-      name: body.name,
-      number: body.number
-    }
-  
-    Phone.findOne({ name: body.name })
-      .then(existingPhone => {
-        if (existingPhone && existingPhone.id !== request.params.id) {
-          return response.status(409).json({
-            error: 'name already exists'
-          })
-        } else {
-          Phone.findByIdAndUpdate(request.params.id, phone, { new: true })
-            .then(updatedPhone => {
-              response.json(updatedPhone.toJSON())
-            })
-            .catch(error => next(error))
-        }
+    
+    Phone.findOneAndUpdate(
+      { name: body.name },
+      { $setOnInsert: { name: body.name, number: body.number } },
+      { upsert: true, new: true, setDefaultsOnInsert: true }
+    )
+      .then((updatedPhone) => {
+        response.json(updatedPhone.toJSON());
       })
-  })
+      .catch((error) => {
+        console.log(error);
+        response.status(500).end();
+      });
+  });
 
+  
 app.get('/info', (request, response) => {
     const actualDate = new Date()
     response.send(`Phonebook has info for ${persons.length} people
