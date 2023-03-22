@@ -100,7 +100,34 @@ app.post('/api/persons', (request, response) => {
       .catch(error => next(error));
   });
 
+  app.put('/api/persons/:id', (request, response, next) => {
+    const id = request.params.id;
+    const body = request.body;
 
+    if (!body.name && !body.number) {
+        return response.status(400).json({
+            error: 'name or number content missing',
+        });
+    }
+
+    const updatedPhone = {};
+    if (body.name) {
+        updatedPhone.name = body.name;
+    }
+    if (body.number) {
+        updatedPhone.number = body.number;
+    }
+
+    Phone.findOneAndUpdate({_id: id}, updatedPhone, {new: true})
+        .then(updatedPhone => {
+            if (updatedPhone) {
+                response.json(updatedPhone);
+            } else {
+                response.status(404).end();
+            }
+        })
+        .catch(error => next(error));
+});
  
   
 app.get('/info', (request, response) => {
