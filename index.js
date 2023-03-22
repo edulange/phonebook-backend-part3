@@ -88,20 +88,20 @@ app.post('/api/persons', (request, response) => {
       });
     }
     
-    Phone.findOneAndUpdate(
-      { name: body.name },
-      { $setOnInsert: { name: body.name, number: body.number } },
-      { upsert: true, new: true, setDefaultsOnInsert: true }
-    )
-      .then((updatedPhone) => {
-        response.json(updatedPhone.toJSON());
+    const phone = new Phone({
+      name: body.name,
+      number: body.number,
+    });
+
+    phone.save()
+      .then(savedPhone => {
+        response.json(savedPhone);
       })
-      .catch((error) => {
-        console.log(error);
-        response.status(500).end();
-      });
+      .catch(error => next(error));
   });
 
+
+ 
   
 app.get('/info', (request, response) => {
     const actualDate = new Date()
