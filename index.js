@@ -144,3 +144,6 @@ const PORT = 3001
 app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
+
+console.log('am i good enough?')
+console.log('id think so =/')
