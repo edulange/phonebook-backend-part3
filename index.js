@@ -82,23 +82,25 @@ app.delete('/api/persons/:id', (request, response) => {
 app.post('/api/persons', (request, response, next) => {
     const body = request.body;
   
+    // Verifica se o nome já existe no banco de dados
     Phone.findOne({ name: body.name })
       .then(existingPhone => {
         if (existingPhone) {
-          request.conflict = true; // set a flag to indicate a conflict
-          next(); // call the next middleware to execute the PUT request
+          // Se já existe um telefone com o mesmo nome, envia uma resposta informando que o contato já existe
+          return response.status(409).json({
+            error: 'Contact with the same name already exists',
+          });
         } else {
+          // Se não existe, cria um novo telefone
           const phone = new Phone({
             name: body.name,
             number: body.number,
           });
-  
-          phone.save()
-            .then(savedPhone => {
-              response.json(savedPhone);
-            })
-            .catch(error => next(error));
+          return phone.save();
         }
+      })
+      .then(savedPhone => {
+        response.json(savedPhone);
       })
       .catch(error => next(error));
   });
@@ -107,41 +109,15 @@ app.post('/api/persons', (request, response, next) => {
     const id = request.params.id;
     const body = request.body;
   
-    if (!body.name && !body.number) {
-        return response.status(400).json({
-            error: 'name or number content missing',
-        });
-    }
-  
-    const updatedPhone = {};
-    if (body.name) {
-        updatedPhone.name = body.name;
-    }
-    if (body.number) {
-        updatedPhone.number = body.number;
-    }
-  
-    if (request.conflict) { // check if there was a conflict in the POST request
-      Phone.findOneAndUpdate({ name: updatedPhone.name }, { number: updatedPhone.number }, { new: true })
-        .then(updatedPhone => {
-          if (updatedPhone) {
-            response.json(updatedPhone);
-          } else {
-            response.status(404).end();
-          }
-        })
-        .catch(error => next(error));
-    } else {
-      Phone.findOneAndUpdate({ _id: id }, updatedPhone, { new: true })
-        .then(updatedPhone => {
-          if (updatedPhone) {
-            response.json(updatedPhone);
-          } else {
-            response.status(404).end();
-          }
-        })
-        .catch(error => next(error));
-    }
+    Phone.findOneAndUpdate({_id: id}, body, {new: true})
+      .then(updatedPhone => {
+        if (updatedPhone) {
+          response.json(updatedPhone);
+        } else {
+          response.status(404).end();
+        }
+      })
+      .catch(error => next(error));
   });
  
   
