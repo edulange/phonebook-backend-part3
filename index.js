@@ -81,19 +81,24 @@ app.delete('/api/persons/:id', (request, response) => {
 
 app.post('/api/persons', (request, response) => {
     const body = request.body;
-    
-    if (!body.name || !body.number) {
-      return response.status(400).json({
-        error: 'name or number content missing',
-      });
-    }
-    
-    const phone = new Phone({
-      name: body.name,
-      number: body.number,
-    });
 
-    phone.save()
+    // Verifica se o nome já existe no banco de dados
+    Phone.findOne({ name: body.name })
+      .then(existingPhone => {
+        if (existingPhone) {
+          // Se já existe um telefone com o mesmo nome, envia uma resposta informando que o contato já existe
+          return response.status(409).json({
+            error: 'Contact with the same name already exists',
+          });
+        } else {
+          // Se não existe, cria um novo telefone
+          const phone = new Phone({
+            name: body.name,
+            number: body.number,
+          });
+          return phone.save();
+        }
+      })
       .then(savedPhone => {
         response.json(savedPhone);
       })
