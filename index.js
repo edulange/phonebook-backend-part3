@@ -87,9 +87,6 @@ app.post('/api/persons', (request, response, next) => {
       .then(existingPhone => {
         if (existingPhone) {
           // Se já existe um telefone com o mesmo nome, envia uma resposta informando que o contato já existe
-          return response.status(409).json({
-            error: 'Contact with the same name already exists',
-          });
         } else {
           // Se não existe, cria um novo telefone
           const phone = new Phone({
