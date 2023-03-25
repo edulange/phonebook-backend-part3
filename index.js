@@ -136,5 +136,4 @@ app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
 
-console.log('am i good enough?')
-console.log('id think so =/')
+//não fazz sentido eu preciso fazer um post e um put? ou é um post ou é um put
