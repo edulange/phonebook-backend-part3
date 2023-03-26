@@ -108,15 +108,26 @@ app.post('/api/persons', (request, response, next) => {
 
 
 app.put('/api/persons/:id', (request, response, next) => {
-  Phone.findOneAndUpdate(
-    { _id: request.params.id }, // Encontra o contato pelo _id
-    { $set: { number: request.body.number } }, // Atualiza o número
-    { new: true } // Retorna o contato atualizado
-  )
-  .then(updatedPhone => {
-    response.json(updatedPhone);
-  })
-  .catch(error => next(error));
+  const id = request.params.id;
+  console.log('id :>> ', id);
+  console.log('params', request.params)
+  const body = request.body;
+  console.log('body :>> ', body);
+  const objectId = mongoose.Types.ObjectId(id);
+
+  Phone.findByIdAndUpdate(objectId, { number: body.number }, { new: true })
+    .then(updatedPhone => {
+      if (updatedPhone) {
+        response.json(updatedPhone);
+      } else {
+        response.status(404).json({ message: `Contato com ID ${id} não encontrado` });
+      }
+    })
+    .catch(error => {
+      console.error(error);
+      response.status(500).json({ message: 'Erro interno do servidor' });
+    });
+});
  
   
 app.get('/info', (request, response) => {
