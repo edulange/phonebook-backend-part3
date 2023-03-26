@@ -1,18 +1,18 @@
-const express = require('express')
-const bodyParser = require('body-parser')
-const logger = require('morgan')
-const cors = require('cors')
+const express = require("express");
+const bodyParser = require("body-parser");
+const logger = require("morgan");
+const cors = require("cors");
 require("dotenv").config();
 
-const Phone = require("./models/phone")
+const Phone = require("./models/phone");
 
-const app = express()
-app.use(cors())
+const app = express();
+app.use(cors());
 
-app.use(bodyParser.json())
-logger.token('body', (req, res) => {
-    return JSON.stringify(req.body)
-})
+app.use(bodyParser.json());
+logger.token("body", (req, res) => {
+	return JSON.stringify(req.body);
+});
 
 const requestLogger = (request, response, next) => {
 	console.log("Method:", request.method);
@@ -36,113 +36,109 @@ const unknownEndpoint = (request, response) => {
 	response.status(404).send({ error: "unknown endpoint" });
 };
 
-app.use(express.json())
-app.use(express.static('build'))
+app.use(express.json());
+app.use(express.static("build"));
 app.use(requestLogger);
 let persons = []; // Inicializando a variável persons como um array vazio
 
-
-app.get('/', (req, res) => {
-    res.send('<h1> Hello vorld! </h1>')
-})
+app.get("/", (req, res) => {
+	res.send("<h1> Hello vorld! </h1>");
+});
 
 app.get("/api/persons", (request, response) => {
-    Phone.find({}).then((phones) => {
-        response.json(phones);
-    });
+	Phone.find({}).then((phones) => {
+		response.json(phones);
+	});
 });
 
-app.get('/api/persons/:id', (request, response) => {
-    const id = request.params.id
-    
-    
-    Phone.findById(id)
-        .then(person => {
-            if (person) {
-                response.json(person.toJSON())
-            } else {
-                response.status(404).end()
-            }
-        })
-        .catch(error => {
-            console.log(error)
-            response.status(500).end()
-        })
-})
+app.get("/api/persons/:id", (request, response) => {
+	const id = request.params.id;
 
-app.delete('/api/persons/:id', (request, response) => {
-    Phone.findByIdAndRemove(request.params.id)
-    .then(result => {
-      response.status(204).end()
-    })
-    .catch(error => next(error))
-})
+	Phone.findById(id)
+		.then((person) => {
+			if (person) {
+				response.json(person.toJSON());
+			} else {
+				response.status(404).end();
+			}
+		})
+		.catch((error) => {
+			console.log(error);
+			response.status(500).end();
+		});
+});
 
+app.delete("/api/persons/:id", (request, response) => {
+	Phone.findByIdAndRemove(request.params.id)
+		.then((result) => {
+			response.status(204).end();
+		})
+		.catch((error) => next(error));
+});
 
 // Rota POST para criar um novo contato ou atualizar o número de um contato existente
-app.post('/api/persons', (request, response, next) => {
-  const body = request.body;
+app.post("/api/persons", (request, response, next) => {
+	const body = request.body;
 
-  // Verifica se o nome já existe no banco de dados
-  Phone.findOne({ name: body.name })
-    .then(existingPhone => {
-      if (existingPhone) {
-        // Se já existe um telefone com o mesmo nome, envia uma resposta informando que o contato já existe
-        return response.status(200).json({
-          message: 'Contact with the same name already exists',
-        });
-      } else {
-        // Se não existe, cria um novo telefone
-        const phone = new Phone({
-          name: body.name,
-          number: body.number,
-        });
-        return phone.save();
-      }
-    })
-    .then(savedPhone => {
-      response.json(savedPhone);
-    })
-    .catch(error => next(error));
+	// Verifica se o nome já existe no banco de dados
+	Phone.findOne({ name: body.name })
+		.then((existingPhone) => {
+			if (existingPhone) {
+				// Se já existe um telefone com o mesmo nome, envia uma resposta informando que o contato já existe
+				return response.status(200).json({
+					message: "Contact with the same name already exists",
+				});
+			} else {
+				// Se não existe, cria um novo telefone
+				const phone = new Phone({
+					name: body.name,
+					number: body.number,
+				});
+				return phone.save();
+			}
+		})
+		.then((savedPhone) => {
+			response.json(savedPhone);
+		})
+		.catch((error) => next(error));
 });
 
+app.put("/api/persons/:id", (request, response, next) => {
+	const id = request.params.id;
+	console.log("id :>> ", id);
+	console.log("params", request.params);
+	const body = request.body;
+	console.log("body :>> ", body);
+	const objectId = mongoose.Types.ObjectId(id);
 
-app.put('/api/persons/:id', (request, response, next) => {
-  const id = request.params.id;
-  console.log('id :>> ', id);
-  console.log('params', request.params)
-  const body = request.body;
-  console.log('body :>> ', body);
-  const objectId = mongoose.Types.ObjectId(id);
-
-  Phone.findByIdAndUpdate(objectId, { number: body.number }, { new: true })
-    .then(updatedPhone => {
-      if (updatedPhone) {
-        response.json(updatedPhone);
-      } else {
-        response.status(404).json({ message: `Contato com ID ${id} não encontrado` });
-      }
-    })
-    .catch(error => {
-      console.error(error);
-      response.status(500).json({ message: 'Erro interno do servidor' });
-    });
+	Phone.findByIdAndUpdate(objectId, { number: body.number }, { new: true })
+		.then((updatedPhone) => {
+			if (updatedPhone) {
+				response.json(updatedPhone);
+			} else {
+				response
+					.status(404)
+					.json({ message: `Contato com ID ${id} não encontrado` });
+			}
+		})
+		.catch((error) => {
+			console.error(error);
+			response.status(500).json({ message: "Erro interno do servidor" });
+		});
 });
- 
-  
-app.get('/info', (request, response) => {
-    const actualDate = new Date()
-    response.send(`Phonebook has info for ${persons.length} people
-    <br>${actualDate}<br>`)
-})
 
-app.use(unknownEndpoint)
+app.get("/info", (request, response) => {
+	const actualDate = new Date();
+	response.send(`Phonebook has info for ${persons.length} people
+    <br>${actualDate}<br>`);
+});
+
+app.use(unknownEndpoint);
 app.use(errorHandler);
 
-
-const PORT = 3001
+const PORT = 3001;
 app.listen(PORT, () => {
-    console.log(`Server running on port ${PORT}`)
-})
+	console.log(`Server running on port ${PORT}`);
+});
 
 //não fazz sentido eu preciso fazer um post e um put? ou é um post ou é um put
