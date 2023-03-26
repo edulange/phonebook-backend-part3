@@ -105,14 +105,8 @@ app.post("/api/persons", (request, response, next) => {
 });
 
 app.put("/api/persons/:id", (request, response, next) => {
-	const id = request.params.id;
-	console.log("id :>> ", id);
-	console.log("params", request.params);
-	const body = request.body;
-	console.log("body :>> ", body);
-	const objectId = mongoose.Types.ObjectId(id);
 
-	Phone.findByIdAndUpdate(objectId, { number: body.number }, { new: true })
+	Phone.findByIdAndUpdate(request.params.id, { number: body.number }, { new: true })
 		.then((updatedPhone) => {
 			if (updatedPhone) {
 				response.json(updatedPhone);
