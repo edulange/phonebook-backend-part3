@@ -106,9 +106,9 @@ app.post('/api/persons', (request, response, next) => {
     .catch(error => next(error));
 });
 
+
 app.put('/api/persons/:id', (request, response, next) => {
-  const id = request.params.id;
-  console.log('id :>> ', id);
+  const id = mongoose.Types.ObjectId(request.params.id); // cria um objeto ObjectId do id passado na URL
   const body = request.body;
 
   Phone.findByIdAndUpdate(id, { number: body.number }, { new: true })
