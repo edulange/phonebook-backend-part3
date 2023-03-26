@@ -79,46 +79,46 @@ app.delete('/api/persons/:id', (request, response) => {
 })
 
 
+// Rota POST para criar um novo contato ou atualizar o número de um contato existente
 app.post('/api/persons', (request, response, next) => {
-    const body = request.body;
-  
-    // Verifica se o nome já existe no banco de dados
-    Phone.findOne({ name: body.name })
-      .then(existingPhone => {
-        if (existingPhone) {
-          // Se já existe um telefone com o mesmo nome, envia uma resposta informando que o contato já existe
-          return response.status(409).json({
-            error: 'Contact with the same name already exists',
-          });
-        } else {
-          // Se não existe, cria um novo telefone
-          const phone = new Phone({
-            name: body.name,
-            number: body.number,
-          });
-          return phone.save();
-        }
-      })
-      .then(savedPhone => {
-        response.json(savedPhone);
-      })
-      .catch(error => next(error));
-  });
-  
-  app.put('/api/persons/:id', (request, response, next) => {
-    const id = request.params.id;
-    const body = request.body;
-  
-    Phone.findOneAndUpdate({_id: id}, body, {new: true})
-      .then(updatedPhone => {
-        if (updatedPhone) {
-          response.json(updatedPhone);
-        } else {
-          response.status(404).end();
-        }
-      })
-      .catch(error => next(error));
-  });
+  const body = request.body;
+
+  // Verifica se o nome já existe no banco de dados
+  Phone.findOne({ name: body.name })
+    .then(existingPhone => {
+      if (existingPhone) {
+        // Se já existe um telefone com o mesmo nome, atualiza o número
+        return Phone.findOneAndUpdate({ _id: existingPhone._id }, { number: body.number }, { new: true });
+      } else {
+        // Se não existe, cria um novo telefone
+        const phone = new Phone({
+          name: body.name,
+          number: body.number,
+        });
+        return phone.save();
+      }
+    })
+    .then(savedPhone => {
+      response.json(savedPhone);
+    })
+    .catch(error => next(error));
+});
+
+// Rota PUT para atualizar o número de um contato existente
+app.put('/api/persons/:id', (request, response, next) => {
+  const id = request.params.id;
+  const body = request.body;
+
+  Phone.findOneAndUpdate({ _id: id }, { number: body.number }, { new: true })
+    .then(updatedPhone => {
+      if (updatedPhone) {
+        response.json(updatedPhone);
+      } else {
+        response.status(404).end();
+      }
+    })
+    .catch(error => next(error));
+});
  
   
 app.get('/info', (request, response) => {
