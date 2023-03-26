@@ -106,17 +106,17 @@ app.post('/api/persons', (request, response, next) => {
     .catch(error => next(error));
 });
 
-// Rota PUT para atualizar o número de um contato existente
 app.put('/api/persons/:id', (request, response, next) => {
   const id = request.params.id;
+  console.log('id :>> ', id);
   const body = request.body;
 
-  Phone.findOneAndUpdate({ _id: id }, { number: body.number }, { new: true })
+  Phone.findByIdAndUpdate(id, { number: body.number }, { new: true })
     .then(updatedPhone => {
       if (updatedPhone) {
         response.json(updatedPhone);
       } else {
-        response.status(404).end();
+        response.status(200).json({ message: `Contato com ID ${id} não encontrado` });
       }
     })
     .catch(error => next(error));
