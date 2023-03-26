@@ -108,7 +108,7 @@ app.post('/api/persons', (request, response, next) => {
 
 
 app.put('/api/persons/:id', (request, response, next) => {
-  const id = mongoose.Types.ObjectId(request.params.id); // cria um objeto ObjectId do id passado na URL
+  const id = request.params.id;
   const body = request.body;
 
   Phone.findByIdAndUpdate(id, { number: body.number }, { new: true })
@@ -116,10 +116,13 @@ app.put('/api/persons/:id', (request, response, next) => {
       if (updatedPhone) {
         response.json(updatedPhone);
       } else {
-        response.status(200).json({ message: `Contato com ID ${id} não encontrado` });
+        response.status(404).json({ message: `Contato com ID ${id} não encontrado` });
       }
     })
-    .catch(error => next(error));
+    .catch(error => {
+      console.error(error);
+      response.status(500).json({ message: 'Erro interno do servidor' });
+    });
 });
  
   
