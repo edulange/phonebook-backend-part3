@@ -98,7 +98,7 @@ app.post("/api/persons", (request, response, next) => {
 			}
 		})
 		.then((savedPhone) => {
-			response.json(savedPhone);
+			response.json(savedPhone).end();
 		})
 		.catch((error) => next(error));
 });
@@ -114,7 +114,7 @@ app.put("/api/persons/:id", (request, response, next) => {
 				response.json(updatedPhone);
 			} else {
 				response
-					.status(404)
+					.status(200)
 					.json({ message: `Contato com ID ${id} não encontrado` });
 			}
 		})
