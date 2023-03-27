@@ -96,6 +96,8 @@ app.post("/api/persons", (req, res, next) => {
 
 app.put("/api/persons/:id", (req, res, next) => {
 	const body = req.body;
+	console.log('body', body)
+	console.log('id', req.params.id)
 
 	const person = {
 		name: body.name,
@@ -103,7 +105,6 @@ app.put("/api/persons/:id", (req, res, next) => {
 	};
 
 	Phone.findByIdAndUpdate(req.params.id, person, {
-		runValidators: true,
 		context: "query",
 		new: true,
 	})
