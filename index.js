@@ -4,7 +4,7 @@ const logger = require("morgan");
 const cors = require("cors");
 require("dotenv").config();
 
-const Person = require("./models/person");
+const Phone = require("./models/phone");
 
 const app = express();
 app.use(cors());
@@ -27,7 +27,7 @@ app.use(express.static("build"));
 app.use(requestLogger);
 
 app.get("/api/persons", (req, res) => {
-	Person.find({}).then((persons) => {
+	Phone.find({}).then((persons) => {
 		res.json(persons);
 	});
 });
@@ -35,7 +35,7 @@ app.get("/api/persons", (req, res) => {
 app.get("/info", (req, res, next) => {
 	const requestTime = new Date(Date.now());
 
-	Person.find({})
+	Phone.find({})
 		.then((persons) => {
 			res.send(
 				`<p>Phonebook has info for ${persons.length} people</p> <p>${requestTime}</p>`
@@ -45,7 +45,7 @@ app.get("/info", (req, res, next) => {
 });
 
 app.get("/api/persons/:id", (req, res, next) => {
-	Person.findById(req.params.id)
+	Phone.findById(req.params.id)
 		.then((person) => {
 			if (person) {
 				res.json(person);
@@ -57,7 +57,7 @@ app.get("/api/persons/:id", (req, res, next) => {
 });
 
 app.delete("/api/persons/:id", (req, res, next) => {
-	Person.findByIdAndRemove(req.params.id)
+	Phone.findByIdAndRemove(req.params.id)
 		.then(() => {
 			res.status(204).end();
 		})
@@ -67,7 +67,7 @@ app.delete("/api/persons/:id", (req, res, next) => {
 app.post("/api/persons", (req, res, next) => {
 	const body = req.body;
 
-	const person = new Person({
+	const person = new Phone({
 		name: body.name,
 		number: body.number,
 	});
@@ -87,7 +87,7 @@ app.put("/api/persons/:id", (req, res, next) => {
 		number: body.number,
 	};
 
-	Person.findByIdAndUpdate(req.params.id, person, {
+	Phone.findByIdAndUpdate(req.params.id, person, {
 		runValidators: true,
 		context: "query",
 		new: true,
