@@ -98,7 +98,8 @@ app.post("/api/persons", (request, response, next) => {
 			}
 		})
 		.then((savedPhone) => {
-			response.json(savedPhone).end();
+			response.json(savedPhone).end()
+			return;
 		})
 		.catch((error) => next(error));
 });
