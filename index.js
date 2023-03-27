@@ -1,5 +1,4 @@
 const express = require("express");
-const mongoose = require('mongoose')
 const bodyParser = require("body-parser");
 const logger = require("morgan");
 const cors = require("cors");
@@ -105,6 +104,9 @@ app.post("/api/persons", (request, response, next) => {
 });
 
 app.put("/api/persons/:id", (request, response, next) => {
+  const body = request.body
+  console.log(body)
+  console.log('request.params.id', request.params.id)
 
 	Phone.findByIdAndUpdate(request.params.id, { number: body.number }, { new: true })
 		.then((updatedPhone) => {
