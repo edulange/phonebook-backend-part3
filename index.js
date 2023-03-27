@@ -76,47 +76,50 @@ app.delete("/api/persons/:id", (request, response) => {
 		.catch((error) => next(error));
 });
 
-// Rota POST para criar um novo contato ou atualizar o número de um contato existente
-app.post("/api/persons", (request, response, next) => {
-	const body = request.body;
-
-	// Verifica se o nome já existe no banco de dados
-	Phone.findOne({ name: body.name })
-		.then((existingPhone) => {
-			if (existingPhone) {
-				// Se já existe um telefone com o mesmo nome, envia uma resposta informando que o contato já existe
-				return response.status(200).json({
-					message: "Contact with the same name already exists",
-				});
-			} else {
-				// Se não existe, cria um novo telefone
-				const phone = new Phone({
-					name: body.name,
-					number: body.number,
-				});
-				return phone.save();
-			}
-		})
-		.then((savedPhone) => {
-			response.json(savedPhone).end()
-			return;
-		})
-		.catch((error) => next(error));
-});
-
-app.put("/api/persons/:id", (request, response, next) => {
-	const id = request.params.id;
-	const body = request.body;
-
-	Phone.findByIdAndUpdate(id, { number: body.number }, { new: true })
-		.then((updatedPhone) => {
-			response.json(updatedPhone);
-		})
-		.catch((error) => {
-			console.error(error);
-			response.status(500).json({ message: "Erro interno do servidor" });
-		});
-});
+app.get('/api/persons/query/:name', (req, res, next) => {
+	const name = req.params.name
+  
+	Person.findOne({ "name": name })
+	  .then(result => {
+		res.json(result)
+	  }).catch(error => next(error))
+  })
+  
+  
+  app.put('/api/persons/:id', (req, res, next) => {
+	const body = req.body
+  
+	const person = {
+	  name: body.name,
+	  number: body.number
+	}
+  
+	Phone.findByIdAndUpdate(req.params.id, person, { new: true })
+	  .then(updatedPerson => {
+		res.json(updatedPerson)
+	  }).catch(error => next(error))
+  })
+  
+  app.post('/api/persons', (req, res, next) => {
+	const body = req.body
+  
+	if (body.name === undefined) {
+	  return res.status(400).json({ error: 'name missing' })
+	}
+	if (body.number === undefined) {
+	  return res.status(400).json({ error: 'number missing' })
+	}
+  
+	const person = new Person({
+	  name: body.name,
+	  number: body.number
+	})
+  
+	person.save().then(savedPerson => {
+	  res.json(savedPerson.toJSON())
+	}).catch(error => next(error))
+  })
+  
 
 app.get("/info", (request, response) => {
 	const actualDate = new Date();
