@@ -79,7 +79,7 @@ app.delete("/api/persons/:id", (request, response) => {
 app.get('/api/persons/query/:name', (req, res, next) => {
 	const name = req.params.name
   
-	Person.findOne({ "name": name })
+	Phone.findOne({ "name": name })
 	  .then(result => {
 		res.json(result)
 	  }).catch(error => next(error))
@@ -130,9 +130,9 @@ app.get("/info", (request, response) => {
 app.use(unknownEndpoint);
 app.use(errorHandler);
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001
 app.listen(PORT, () => {
-	console.log(`Server running on port ${PORT}`);
-});
+  console.log(`Server running on port ${PORT}`)
+})
 
 //não fazz sentido eu preciso fazer um post e um put? ou é um post ou é um put
