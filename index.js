@@ -4,7 +4,7 @@ const logger = require("morgan");
 const cors = require("cors");
 require("dotenv").config();
 
-const Phone = require("./models/phone");
+const Person = require("./models/person");
 
 const app = express();
 app.use(cors());
@@ -46,7 +46,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api/persons", (request, response) => {
-	Phone.find({}).then((phones) => {
+	Person.find({}).then((phones) => {
 		response.json(phones);
 	});
 });
@@ -54,7 +54,7 @@ app.get("/api/persons", (request, response) => {
 app.get("/api/persons/:id", (request, response) => {
 	const id = request.params.id;
 
-	Phone.findById(id)
+	Person.findById(id)
 		.then((person) => {
 			if (person) {
 				response.json(person.toJSON());
@@ -69,57 +69,46 @@ app.get("/api/persons/:id", (request, response) => {
 });
 
 app.delete("/api/persons/:id", (request, response) => {
-	Phone.findByIdAndRemove(request.params.id)
+	Person.findByIdAndRemove(request.params.id)
 		.then((result) => {
 			response.status(204).end();
 		})
 		.catch((error) => next(error));
 });
 
-app.get('/api/persons/query/:name', (req, res, next) => {
-	const name = req.params.name
-  
-	Phone.findOne({ "name": name })
-	  .then(result => {
-		res.json(result)
-	  }).catch(error => next(error))
-  })
-  
-  
-  app.put('/api/persons/:id', (req, res, next) => {
-	const body = req.body
-  
-	const person = {
-	  name: body.name,
-	  number: body.number
-	}
-  
-	Phone.findByIdAndUpdate(req.params.id, person, { new: true })
-	  .then(updatedPerson => {
-		res.json(updatedPerson)
-	  }).catch(error => next(error))
-  })
-  
-  app.post('/api/persons', (req, res, next) => {
-	const body = req.body
-  
-	if (body.name === undefined) {
-	  return res.status(400).json({ error: 'name missing' })
-	}
-	if (body.number === undefined) {
-	  return res.status(400).json({ error: 'number missing' })
-	}
-  
+app.post("/api/persons", (req, res, next) => {
+	const body = req.body;
+
 	const person = new Person({
-	  name: body.name,
-	  number: body.number
+		name: body.name,
+		number: body.number,
+	});
+
+	person
+		.save()
+		.then((savedPerson) => savedPerson.toJSON())
+		.then((savedAndFormattedPerson) => res.json(savedAndFormattedPerson))
+		.catch((error) => next(error));
+});
+
+app.put("/api/persons/:id", (req, res, next) => {
+	const body = req.body;
+
+	const person = {
+		name: body.name,
+		number: body.number,
+	};
+
+	Person.findByIdAndUpdate(req.params.id, person, {
+		runValidators: true,
+		context: "query",
+		new: true,
 	})
-  
-	person.save().then(savedPerson => {
-	  res.json(savedPerson.toJSON())
-	}).catch(error => next(error))
-  })
-  
+		.then((updatedPerson) => {
+			res.json(updatedPerson);
+		})
+		.catch((error) => next(error));
+});
 
 app.get("/info", (request, response) => {
 	const actualDate = new Date();
@@ -130,9 +119,9 @@ app.get("/info", (request, response) => {
 app.use(unknownEndpoint);
 app.use(errorHandler);
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
-})
+	console.log(`Server running on port ${PORT}`);
+});
 
 //não fazz sentido eu preciso fazer um post e um put? ou é um post ou é um put
