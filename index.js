@@ -82,7 +82,7 @@ app.delete("/api/persons/:id", (req, res, next) => {
 app.post("/api/persons", (req, res, next) => {
 	const body = req.body;
 
-	const person = new Person({
+	const person = new Phone({
 		name: body.name,
 		number: body.number,
 	});
