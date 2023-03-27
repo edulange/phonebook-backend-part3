@@ -22,12 +22,27 @@ const requestLogger = (request, response, next) => {
 	next();
 };
 
+const errorHandler = (error, request, response, next) => {
+	console.error(error.message);
+
+	if (error.name === "CastError") {
+		return response.status(400).send({ error: "malformatted id" });
+	}
+
+	next(error);
+};
+
+const unknownEndpoint = (request, response) => {
+	response.status(404).send({ error: "unknown endpoint" });
+};
+
 app.use(express.json());
 app.use(express.static("build"));
 app.use(requestLogger);
+let persons = []; // Inicializando a variável persons como um array vazio
 
 app.get("/api/persons", (req, res) => {
-	Phone.find({}).then((persons) => {
+	Person.find({}).then((persons) => {
 		res.json(persons);
 	});
 });
@@ -35,7 +50,7 @@ app.get("/api/persons", (req, res) => {
 app.get("/info", (req, res, next) => {
 	const requestTime = new Date(Date.now());
 
-	Phone.find({})
+	Person.find({})
 		.then((persons) => {
 			res.send(
 				`<p>Phonebook has info for ${persons.length} people</p> <p>${requestTime}</p>`
@@ -45,7 +60,7 @@ app.get("/info", (req, res, next) => {
 });
 
 app.get("/api/persons/:id", (req, res, next) => {
-	Phone.findById(req.params.id)
+	Person.findById(req.params.id)
 		.then((person) => {
 			if (person) {
 				res.json(person);
@@ -57,7 +72,7 @@ app.get("/api/persons/:id", (req, res, next) => {
 });
 
 app.delete("/api/persons/:id", (req, res, next) => {
-	Phone.findByIdAndRemove(req.params.id)
+	Person.findByIdAndRemove(req.params.id)
 		.then(() => {
 			res.status(204).end();
 		})
@@ -67,7 +82,7 @@ app.delete("/api/persons/:id", (req, res, next) => {
 app.post("/api/persons", (req, res, next) => {
 	const body = req.body;
 
-	const person = new Phone({
+	const person = new Person({
 		name: body.name,
 		number: body.number,
 	});
@@ -87,7 +102,7 @@ app.put("/api/persons/:id", (req, res, next) => {
 		number: body.number,
 	};
 
-	Phone.findByIdAndUpdate(req.params.id, person, {
+	Person.findByIdAndUpdate(req.params.id, person, {
 		runValidators: true,
 		context: "query",
 		new: true,
@@ -98,24 +113,7 @@ app.put("/api/persons/:id", (req, res, next) => {
 		.catch((error) => next(error));
 });
 
-const unknownEndpoint = (req, res) => {
-	res.status(404).send({ error: "unknown endpoint" });
-};
-
 app.use(unknownEndpoint);
-
-const errorHandler = (error, req, res, next) => {
-	console.error(error.message);
-
-	if (error.name === "CastError") {
-		return res.status(400).send({ error: "malformatted id" });
-	} else if (error.name === "ValidationError") {
-		return res.status(400).json({ error: error.message });
-	}
-
-	next(error);
-};
-
 app.use(errorHandler);
 
 const PORT = 3001;
