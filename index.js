@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 const logger = require("morgan");
 const cors = require("cors");
 
-const Person = require("./models/phone");
+const Phone = require("./models/phone");
 
 app.use(cors());
 
@@ -21,13 +21,13 @@ app.use(express.static("build"));
 
 
 app.get('/api/persons', (request, response) => {
-	Person.find({}).then(persons => {
+	Phone.find({}).then(persons => {
 	  response.json(persons.map(person => person))
 	})
   })
 
   app.get('/info', (request, response) => {
-	Person.find({})
+	Phone.find({})
 	  .then((persons) => {
 		response.send(
 		  `<div>
@@ -42,7 +42,7 @@ app.get('/api/persons', (request, response) => {
 
   app.get('/api/persons/:id', (request, response, next) => {
 
-	Person.findById(request.params.id)
+	Phone.findById(request.params.id)
 	  .then(person => {
 		if (person) {
 		  response.json(person)
@@ -55,7 +55,7 @@ app.get('/api/persons', (request, response) => {
   })
 
   app.delete('/api/persons/:id', (request, response, next) => {
-	Person.findByIdAndRemove(request.params.id)
+	Phone.findByIdAndRemove(request.params.id)
 	  .then(() => {
 		response.status(204).end()
 	  })
@@ -95,7 +95,7 @@ app.get('/api/persons', (request, response) => {
 	  number: body.number,
 	}
   
-	Person.findByIdAndUpdate(id, person, { new: true })
+	Phone.findByIdAndUpdate(id, person, { new: true })
 	  .then((updatedPerson) => {
 		response.json(updatedPerson)
 	  })
