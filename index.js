@@ -1,12 +1,12 @@
+require("dotenv").config();
 const express = require("express");
+const app = express();
 const bodyParser = require("body-parser");
 const logger = require("morgan");
 const cors = require("cors");
-require("dotenv").config();
 
-const Phone = require("./models/phone");
+const Person = require("./models/phone");
 
-const app = express();
 app.use(cors());
 
 app.use(bodyParser.json());
@@ -14,108 +14,115 @@ logger.token("body", (req, res) => {
 	return JSON.stringify(req.body);
 });
 
-const requestLogger = (request, response, next) => {
-	console.log("Method:", request.method);
-	console.log("Path:  ", request.path);
-	console.log("Body:  ", request.body);
-	console.log("---");
-	next();
-};
-
-const errorHandler = (error, request, response, next) => {
-	console.error(error.message);
-
-	if (error.name === "CastError") {
-		return response.status(400).send({ error: "malformatted id" });
-	}
-
-	next(error);
-};
-
-const unknownEndpoint = (request, response) => {
-	response.status(404).send({ error: "unknown endpoint" });
-};
 
 app.use(express.json());
 app.use(express.static("build"));
 app.use(requestLogger);
-let persons = []; // Inicializando a variável persons como um array vazio
 
-app.get("/api/persons", (req, res) => {
-	Phone.find({}).then((persons) => {
-		res.json(persons);
-	});
-});
 
-app.get("/info", (req, res, next) => {
-	const requestTime = new Date(Date.now());
-
-	Phone.find({})
-		.then((persons) => {
-			res.send(
-				`<p>Phonebook has info for ${persons.length} people</p> <p>${requestTime}</p>`
-			);
-		})
-		.catch((error) => next(error));
-});
-
-app.get("/api/persons/:id", (req, res, next) => {
-	Phone.findById(req.params.id)
-		.then((person) => {
-			if (person) {
-				res.json(person);
-			} else {
-				res.status(404).end();
-			}
-		})
-		.catch((error) => next(error));
-});
-
-app.delete("/api/persons/:id", (req, res, next) => {
-	Phone.findByIdAndRemove(req.params.id)
-		.then(() => {
-			res.status(204).end();
-		})
-		.catch((error) => next(error));
-});
-
-app.post("/api/persons", (req, res, next) => {
-	const body = req.body;
-
-	const person = new Phone({
-		name: body.name,
-		number: body.number,
-	});
-
-	person
-		.save()
-		.then((savedPerson) => savedPerson.toJSON())
-		.then((savedAndFormattedPerson) => res.json(savedAndFormattedPerson))
-		.catch((error) => next(error));
-});
-
-app.put("/api/persons/:id", (req, res, next) => {
-	const body = req.body;
-	console.log('body', body)
-	console.log('id', req.params.id)
-
-	const person = {
-		name: body.name,
-		number: body.number,
-	};
-
-	Phone.findByIdAndUpdate(req.params.id, person, {
-		context: "query",
-		new: true,
+app.get('/api/persons', (request, response) => {
+	Person.find({}).then(persons => {
+	  response.json(persons.map(person => person))
 	})
-		.then((updatedPerson) => {
-			res.json(updatedPerson);
-		})
-		.catch((error) => next(error));
-});
+  })
 
-app.use(unknownEndpoint);
-app.use(errorHandler);
+  app.get('/info', (request, response) => {
+	Person.find({})
+	  .then((persons) => {
+		response.send(
+		  `<div>
+				  <span>Phonebook has info of ${persons.length} people</span> 
+			  </div>
+			  <span>${new Date().toString()}</span>`
+		)
+	  })
+	  // eslint-disable-next-line no-undef
+	  .catch((error) => next(error))
+  })
+
+  app.get('/api/persons/:id', (request, response, next) => {
+
+	Person.findById(request.params.id)
+	  .then(person => {
+		if (person) {
+		  response.json(person)
+		}else{
+		  response.status(404).end()
+		}
+	  })
+  
+	  .catch((error) => next(error))
+  })
+
+  app.delete('/api/persons/:id', (request, response, next) => {
+	Person.findByIdAndRemove(request.params.id)
+	  .then(() => {
+		response.status(204).end()
+	  })
+	  .catch(error => next(error))
+  
+  })
+
+  app.post('/api/persons', (request, response, next) => {
+
+	const body = request.body
+  
+	if (body.name === undefined) {
+	  return response.status(400).json({ error: 'name missing' })
+	}
+	if (body.number === undefined) {
+	  return response.status(400).json({ error: 'number missing' })
+	}
+	const person = new Person({
+	  name: body.name,
+	  number: body.number,
+	})
+  
+	person
+	  .save()
+	  .then(savedPerson => {
+		response.json(savedPerson.toJSON())
+	  })
+	  .catch((error) => next(error))
+  
+  })
+  app.put('/api/persons/:id', (request, response, next) => {
+	const { body } = request
+	const { id } = request.params
+  
+	const person = {
+	  name: body.name,
+	  number: body.number,
+	}
+  
+	Person.findByIdAndUpdate(id, person, { new: true })
+	  .then((updatedPerson) => {
+		response.json(updatedPerson)
+	  })
+	  .catch((error) => next(error))
+  })
+  
+  const unknownEndpoint = (request, response) => {
+	response.status(404).send({ error: 'unknown endpoint' })
+  }
+  
+  // handler of requests with unknown endpoint
+  app.use(unknownEndpoint)
+  
+  const errorHandler = (error, request, response, next) => {
+	console.error(error.message)
+  
+	if (error.name === 'CastError') {
+	  return response.status(400).send({ error: 'malformatted id' })
+	} else if(error.name === 'ValidationError'){
+	  return response.status(400).json({ error: error.message })
+	}
+  
+	next(error)
+  }
+  
+  // handler of requests with result to errors
+  app.use(errorHandler)
 
 const PORT = 3001;
 app.listen(PORT, () => {

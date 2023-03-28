@@ -14,10 +14,11 @@ mongoose.connect(url)
     console.log('error connecting to MongoDB(from backend):', error.message)
   })
 
-  const phoneSchema = new mongoose.Schema({
-	name: String,
-	number: Number,
-});
+  const personSchema = new mongoose.Schema({
+    name: { type: String, required: true, unique: true, minlength: 3 },
+    number: { type: String, required: true, unique: true, minlength:8 }
+  })
+
 
 phoneSchema.set('toJSON', {
     transform: (document, returnedObject) => {
@@ -27,4 +28,4 @@ phoneSchema.set('toJSON', {
     },
   })
 
-module.exports = mongoose.model('Phone', phoneSchema)
+  module.exports = mongoose.model('Person', personSchema)
