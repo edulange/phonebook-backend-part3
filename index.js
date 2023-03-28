@@ -17,7 +17,7 @@ logger.token("body", (req, res) => {
 
 app.use(express.json());
 app.use(express.static("build"));
-app.use(requestLogger);
+
 
 
 app.get('/api/persons', (request, response) => {
