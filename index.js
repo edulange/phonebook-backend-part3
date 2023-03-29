@@ -73,7 +73,7 @@ app.get('/api/persons', (request, response) => {
 	if (body.number === undefined) {
 	  return response.status(400).json({ error: 'number missing' })
 	}
-	const person = new Person({
+	const person = new Phone({
 	  name: body.name,
 	  number: body.number,
 	})
@@ -86,6 +86,7 @@ app.get('/api/persons', (request, response) => {
 	  .catch((error) => next(error))
   
   })
+
   app.put('/api/persons/:id', (request, response, next) => {
 	const { body } = request
 	const { id } = request.params
