@@ -62,15 +62,13 @@ app.get("/api/persons", (request, response) => {
   app.post("/api/persons", (request, response, next) => {
 	const { name, number } = request.body;
   
-	const person = new Phone({
-	  name: name,
-	  number: number,
-	});
-  
-	person
-	  .save()
-	  .then((savedPerson) => {
-		response.json(savedPerson);
+	Phone.findOneAndUpdate(
+	  { name },
+	  { number },
+	  { new: true, upsert: true }
+	)
+	  .then((updatedPerson) => {
+		response.json(updatedPerson);
 	  })
 	  .catch((error) => next(error));
   });
