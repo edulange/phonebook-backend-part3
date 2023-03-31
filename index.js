@@ -117,3 +117,4 @@ app.listen(PORT, () => {
 });
 
 //não fazz sentido eu preciso fazer um post e um put? ou é um post ou é um put
+//a vida é só isso?
