@@ -118,3 +118,4 @@ app.listen(PORT, () => {
 
 //não fazz sentido eu preciso fazer um post e um put? ou é um post ou é um put
 //a vida é só isso?
+//acho que loucura é eu achar que iss ovai mudar alguma coisa.
