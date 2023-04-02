@@ -75,19 +75,26 @@ app.get("/api/persons", (request, response) => {
 	  .catch((error) => next(error));
   });
 
-  app.put("/api/persons/:id", (request, response, next) => {
+  app.put('/api/persons/:id', (request, response, next) => {
 	const { name, number } = request.body;
   
-	Phone.findByIdAndUpdate(
-	  request.params.id,
-	  { name, number },
-	  { new: true }
-	)
-	  .then((updatedPerson) => {
-		response.json(updatedPerson);
-	  })
-	  .catch((error) => next(error));
-  });
+	const person = new Phone({
+		name: name,
+		number: number,
+	  });
+  
+	  Phone.findByIdAndUpdate(
+		request.params.id,
+		person,
+		{ new: true }
+	  )
+		.then((updatedPerson) => {
+		  response.json(updatedPerson);
+		})
+		.catch((error) => next(error));
+	});
+
+
   
   const unknownEndpoint = (request, response) => {
 	response.status(404).send({ error: 'unknown endpoint' })
