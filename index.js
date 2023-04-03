@@ -20,79 +20,78 @@ app.use(express.static("build"));
 
 
 
-app.get("/api/persons", (request, response) => {
-	Phone.find({}).then((persons) => {
-	  response.json(persons);
-	});
-  });
-  
-  app.get("/api/persons/:id", (request, response, next) => {
-	Phone.findById(request.params.id)
-	  .then((person) => {
-		if (person) {
-		  response.json(person);
-		} else {
-		  response.status(404).end();
-		}
-	  })
-	  .catch((error) => next(error));
-  });
-
-  app.get("/info", (request, response, next) => {
+app.get("/api/persons", (req, res, next) => {
 	Phone.find({})
-	  .then((people) => {
-		response.send(
-		  `<p>Phonebook has info for ${
-			people.length
-		  } people</p><p>${new Date()}</p>`
-		);
-	  })
-	  .catch((error) => next(error));
-  });
-
-
-  app.delete("/api/persons/:id", (request, response, next) => {
-	Phone.findByIdAndDelete(request.params.id)
-	  .then(() => {
-		response.status(204).end();
-	  })
-	  .catch((error) => next(error));
-  });
-
-  app.post("/api/persons", (request, response, next) => {
-	const { name, number } = request.body;
-  
-	const person = new Phone({
-	  name: name,
-	  number: number,
-	});
-  
-	person
-	  .save()
-	  .then((savedPerson) => {
-		response.json(savedPerson);
-	  })
-	  .catch((error) => next(error));
-  });
-
-  app.put('/api/persons/:id', (request, response, next) => {
-	const { name, number } = request.body;
-  
-	const person = new Phone({
-		name: name,
-		number: number,
-	  });
-  
-	  Phone.findByIdAndUpdate(
-		request.params.id,
-		person,
-		{ new: true }
-	  )
-		.then((updatedPerson) => {
-		  response.json(updatedPerson);
+		.then((response) => {
+			res.json(response);
 		})
 		.catch((error) => next(error));
-	});
+});
+  
+app.get("/api/persons/:id", (req, res, next) => {
+	Phone.findById(req.params.id)
+		.then((response) => {
+			if (response) {
+				res.json(response);
+			} else {
+				res.status(404).end();
+			}
+		})
+		.catch((error) => next(error));
+});
+
+app.put("/api/persons/:id", (req, res, next) => {
+	Phone.findByIdAndUpdate(req.params.id, { number: req.body.number })
+		.then(() => {
+			Phone.findById(req.params.id)
+				.then((response) => res.json(response))
+				.catch((error) => next(error));
+		})
+		.catch((error) => next(error));
+});
+
+app.delete("/api/persons/:id", (req, res, next) => {
+	Phone.deleteOne({ _id: req.params.id })
+		.then((response) => {
+			console.log(response);
+			res.status(204).end();
+		})
+		.catch((error) => next(error));
+});
+
+app.post("/api/persons", (req, res, next) => {
+	if (!req.body.name || !req.body.number) {
+		res.status(400).json({
+			error: "Name and/or Number is missing",
+		});
+	} else {
+		const person = new Phone({
+			name: req.body.name,
+			number: req.body.number,
+		});
+
+		person
+			.save()
+			.then((savedPhone) => {
+				res.json(savedPhone);
+			})
+			.catch((error) => next(error));
+	}
+});
+
+app.get("/info", (req, res, next) => {
+	Phone.find({})
+		.then((response) => {
+			const date = new Date(Date.now());
+			res.send(
+				`Phonebook has info for ${
+					response.length
+				} people <br/> ${date.toString()}`
+			);
+		})
+		.catch((error) => next(error));
+});
+
 
 
   
