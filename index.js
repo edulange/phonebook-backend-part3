@@ -3,6 +3,8 @@ const app = express();
 const morgan = require("morgan");
 const cors = require("cors");
 require("dotenv").config();
+
+const port = process.env.PORT || 3001;
 const Person = require("./models/person");
 
 app.use(express.json());
