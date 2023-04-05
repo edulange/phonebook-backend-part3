@@ -1,13 +1,14 @@
-require('dotenv').config();
-const express = require('express');
-const morgan = require('morgan');
-const cors = require("cors");
-
-app.use(cors());
+const express = require("express");
 const app = express();
-const port = process.env.PORT || 3001;
+const morgan = require("morgan");
+const cors = require("cors");
+require("dotenv").config();
+const Person = require("./models/person");
 
-const Person = require('./models/person');
+app.use(express.json());
+app.use(cors());
+app.use(express.static("build"));
+
 
 const errorHandler = (error, _request, response, next) => {
   if (error.name === 'CastError')
